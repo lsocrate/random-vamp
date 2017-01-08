@@ -109,4 +109,54 @@ describe('Health', function () {
       CLEAN,
     ])
   })
+  it('heals damage', function () {
+    const health = new Health({size: 5, stamina: 2})
+    health.injure(AGGRAVATED)
+    health.injure(LETHAL)
+    health.injure(BASHING)
+
+    health.heal()
+    expect(health.track).to.deep.equal([
+      AGGRAVATED,
+      LETHAL,
+      CLEAN,
+      CLEAN,
+      CLEAN,
+      CLEAN,
+      CLEAN,
+    ])
+
+    health.heal()
+    expect(health.track).to.deep.equal([
+      AGGRAVATED,
+      CLEAN,
+      CLEAN,
+      CLEAN,
+      CLEAN,
+      CLEAN,
+      CLEAN,
+    ])
+
+    health.heal()
+    expect(health.track).to.deep.equal([
+      CLEAN,
+      CLEAN,
+      CLEAN,
+      CLEAN,
+      CLEAN,
+      CLEAN,
+      CLEAN,
+    ])
+
+    health.heal()
+    expect(health.track).to.deep.equal([
+      CLEAN,
+      CLEAN,
+      CLEAN,
+      CLEAN,
+      CLEAN,
+      CLEAN,
+      CLEAN,
+    ])
+  })
 })
