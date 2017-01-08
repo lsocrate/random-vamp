@@ -5,19 +5,24 @@ const SURVIVABILITY = 50;
 
 const hMap = {
   '0': { loss: 0, gain: 0 },
-  '1': { loss: 1, gain: 34 },
-  '2': { loss: 2, gain: 21 },
-  '3': { loss: 3, gain: 13 },
-  '4': { loss: 5, gain: 8 },
-  '5': { loss: 8, gain: 5 },
-  '6': { loss: 13, gain: 3 },
-  '7': { loss: 21, gain: 2 },
-  '8': { loss: 34, gain: 1 },
-  '9': { loss: 55, gain: 1 },
-  '10': { loss: 89, gain: 0 },
+  '1': { loss: 2, gain: 34 },
+  '2': { loss: 3, gain: 21 },
+  '3': { loss: 5, gain: 13 },
+  '4': { loss: 8, gain: 8 },
+  '5': { loss: 13, gain: 5 },
+  '6': { loss: 21, gain: 3 },
+  '7': { loss: 34, gain: 2 },
+  '8': { loss: 55, gain: 1 },
+  '9': { loss: 89, gain: 1 },
+  '10': { loss: 95, gain: 0 },
 };
 
-function vamp (targetAge, vampBase = {}, embraceCb) {
+function vampString (v) {
+  const isActive = v.isDestroyed ? '✝' : '•';
+  return `${isActive} ${v.name}, ${v.generation}th gen childe of ${v.sire}: ${v.age} yo. Hum ${v.humanity}. Sired ${v.children} times. XP ${v.xp}`;
+}
+
+function vamp (targetAge, vampBase = {}, embraceCb, immortal = false) {
   const v = _.defaults(vampBase, {
     name: chance.name(),
     clan: chance.pick(['Daeva', 'Gangrel', 'Mekhet', 'Nosferatu', 'Ventrue']),
@@ -26,10 +31,12 @@ function vamp (targetAge, vampBase = {}, embraceCb) {
     children: 0,
     beats: 0,
     xp: 0,
-    sire: undefined
+    sire: undefined,
+    generation: 1,
+    isDestroyed: false
   });
 
-  function embrace() {
+  function embrace () {
     v.children++;
     embraceCb(_.clone(v));
   }
@@ -57,7 +64,6 @@ function vamp (targetAge, vampBase = {}, embraceCb) {
     }
 
     if (v.humanity <= 0) {
-      console.log('Lost to the beast');
       break;
     }
 
@@ -73,8 +79,8 @@ function vamp (targetAge, vampBase = {}, embraceCb) {
 
     const rollToDie = chance.d100();
     const chanceOfDeath = 100 / (SURVIVABILITY * Math.log10(v.age + 1));
-    if (rollToDie <= chanceOfDeath) {
-      console.log('Met final death');
+    if (!immortal && rollToDie <= chanceOfDeath) {
+      v.isDestroyed = true
       break;
     }
   }
@@ -84,9 +90,11 @@ function vamp (targetAge, vampBase = {}, embraceCb) {
 
 function handleChilde (sire) {
   const {age, clan} = sire;
-  const childe = vamp(age, {clan, sire: sire.name}, handleChilde);
-  console.log('A childe', childe);
-
+  const childe = vamp(age, {clan, sire: sire.name, generation: sire.generation + 1}, handleChilde);
+  console.log(vampString(childe));
 }
-const dude = vamp(parseInt(process.argv[2]), {}, handleChilde);
-console.log('The methuselah', dude);
+
+
+const dude = vamp(parseInt(process.argv[2]), { generation: 1 }, handleChilde, true);
+console.log(vampString(dude));
+console.log(`## Here began the ${dude.clan} lineage of ${dude.name}`);
