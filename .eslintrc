@@ -11,6 +11,7 @@
   },
   "rules": {
     "padded-blocks": ["error", "never"],
-    "space-before-function-paren": ["error", "always"]
+    "space-before-function-paren": ["error", "always"],
+    "no-inner-declarations": false
   }
 }
